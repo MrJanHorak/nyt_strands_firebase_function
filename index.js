@@ -1,26 +1,44 @@
-const axios = require('axios');
 const puppeteer = require('puppeteer');
+const NodeCache = require('node-cache');
+
+// Create a new cache instance
+const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
 let url = 'https://www.nytimes.com/games/strands';
 
 (async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(url);
+  let data = myCache.get('buttonValues');
 
-  // Click the play button
-  await page.click('button.Feo8La_playButton'); // replace 'button.playButton' with the correct selector for the play button
+  if (data === undefined) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url);
 
-  // Wait for the necessary element to be loaded
-  await page.waitForSelector('button.pRjvKq_item'); // replace 'button.pRjvKq_item' with the correct selector for the element you want to scrape
+    // Click the play button
+    await page.click('button.Feo8La_playButton'); 
 
-  // Scrape the data
-  const buttonValues = await page.evaluate(() => {
-    const buttons = Array.from(document.querySelectorAll('button.pRjvKq_item')); // replace 'button.pRjvKq_item' with the correct selector for the element you want to scrape
-    return buttons.map(button => button.innerText);
-  });
+    // Wait for the necessary element to be loaded
 
-  console.log(buttonValues);
+    await page.waitForSelector('button.pRjvKq_item'); 
 
-  await browser.close();
+    // Scrape the data
+  data = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button.pRjvKq_item')); 
+      const buttonValues = buttons.map(button => button.innerText);
+      const clue = document.querySelector('h1.umfyna_clue').innerText;
+      return { buttonValues, clue };
+    });
+
+    myCache.set('data', data);
+
+    await browser.close();
+  }
+
+  // Format the data into an array of arrays with 8 arrays of 6 numbers
+  let formattedButtonValues = [];
+  for (let i = 0; i < data.buttonValues.length; i += 6) {
+    formattedButtonValues.push(data.buttonValues.slice(i, i + 6));
+  }
+  console.log('Clue:', data.clue);
+  console.log('Button Values:', formattedButtonValues);
 })();
