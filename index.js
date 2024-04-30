@@ -1,7 +1,7 @@
-import { launch } from 'puppeteer';
-import NodeCache from 'node-cache';
-import express from 'express';
-import cors from 'cors';
+const puppeteer = require('puppeteer');
+const NodeCache = require('node-cache');
+const express = require('express');
+const cors = require('cors');
 
 const app = express();
 app.use(cors());
@@ -14,7 +14,7 @@ app.get('/data', async (req, res) => {
   let data = myCache.get('data');
 
   if (data === undefined) {
-    const browser = await launch();
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(url);
 
@@ -50,4 +50,4 @@ app.get('/data', async (req, res) => {
 
 app.listen(3000, () => console.log('Server running on port 3000'));
 
-export default app;
+module.exports = app;
