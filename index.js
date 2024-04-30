@@ -25,8 +25,8 @@ app.get('/data', async (req, res) => {
     // Scrape the data
     data = await page.evaluate(() => {
       const buttons = Array.from(document.querySelectorAll('button.pRjvKq_item')); 
-      const buttonValues = buttons.map((button: Element) => (button as HTMLButtonElement).innerText); // Update type assertion
-      const clue = (document.querySelector('h1.umfyna_clue') as HTMLElement | null)?.innerText; // Use optional chaining
+      const buttonValues = buttons.map(button => button.innerText);
+      const clue = document.querySelector('h1.umfyna_clue').innerText;
       return { buttonValues, clue };
     });
 
@@ -36,7 +36,7 @@ app.get('/data', async (req, res) => {
   }
 
   // Format the data into an array of arrays with 8 arrays of 6 numbers
-  let formattedButtonValues: string[][] = [];
+  let formattedButtonValues = [];
   for (let i = 0; i < data.buttonValues.length; i += 6) {
     formattedButtonValues.push(data.buttonValues.slice(i, i + 6));
   }
@@ -45,5 +45,3 @@ app.get('/data', async (req, res) => {
 });
 
 app.listen(3000, () => console.log('Server running on port 3000'));
-
-module.exports = app;
