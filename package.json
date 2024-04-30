@@ -13,7 +13,8 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "node-cache": "^5.1.2",
-    "puppeteer": "^22.7.1"
+    "puppeteer": "^22.7.1",
+    "puppeteer-core": "^22.7.1"
   },
   "devDependencies": {
     "firebase-functions-test": "^3.1.0"
