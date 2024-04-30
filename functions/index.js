@@ -1,7 +1,15 @@
+const functions = require('firebase-functions');
 const puppeteer = require('puppeteer');
 const NodeCache = require('node-cache');
 const express = require('express');
+const cors = require('cors')
+
+const PUPPETEER_OPTIONS = {
+  headless: true,
+};
+
 const app = express();
+app.use(cors());
 
 // Create a new cache instance
 const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
@@ -12,7 +20,7 @@ app.get('/data', async (req, res) => {
   let data = myCache.get('data');
 
   if (data === undefined) {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch(PUPPETEER_OPTIONS);
     const page = await browser.newPage();
     await page.goto(url);
 
@@ -44,6 +52,4 @@ app.get('/data', async (req, res) => {
   res.json({ clue: data.clue, buttonValues: formattedButtonValues });
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
-
-module.exports = app;
+exports.api = functions.https.onRequest(app);
