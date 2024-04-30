@@ -1,8 +1,10 @@
 import { launch } from 'puppeteer';
 import NodeCache from 'node-cache';
 import express from 'express';
-const app = express();
+import cors from 'cors';
 
+const app = express();
+app.use(cors());
 // Create a new cache instance
 const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
@@ -17,15 +19,17 @@ app.get('/data', async (req, res) => {
     await page.goto(url);
 
     // Click the play button
-    await page.click('button.Feo8La_playButton'); 
+    await page.click('button.Feo8La_playButton');
 
     // Wait for the necessary element to be loaded
-    await page.waitForSelector('button.pRjvKq_item'); 
+    await page.waitForSelector('button.pRjvKq_item');
 
     // Scrape the data
     data = await page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('button.pRjvKq_item')); 
-      const buttonValues = buttons.map(button => button.innerText);
+      const buttons = Array.from(
+        document.querySelectorAll('button.pRjvKq_item')
+      );
+      const buttonValues = buttons.map((button) => button.innerText);
       const clue = document.querySelector('h1.umfyna_clue').innerText;
       return { buttonValues, clue };
     });

@@ -3,12 +3,8 @@ const puppeteer = require('puppeteer');
 const NodeCache = require('node-cache');
 const express = require('express');
 const cors = require('cors')
-
-const PUPPETEER_OPTIONS = {
-  headless: true,
-};
-
 const app = express();
+
 app.use(cors());
 
 // Create a new cache instance
