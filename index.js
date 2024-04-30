@@ -1,6 +1,6 @@
-const puppeteer = require('puppeteer');
-const NodeCache = require('node-cache');
-const express = require('express');
+import { launch } from 'puppeteer';
+import NodeCache from 'node-cache';
+import express from 'express';
 const app = express();
 
 // Create a new cache instance
@@ -12,7 +12,7 @@ app.get('/data', async (req, res) => {
   let data = myCache.get('data');
 
   if (data === undefined) {
-    const browser = await puppeteer.launch();
+    const browser = await launch();
     const page = await browser.newPage();
     await page.goto(url);
 
@@ -46,4 +46,4 @@ app.get('/data', async (req, res) => {
 
 app.listen(3000, () => console.log('Server running on port 3000'));
 
-module.exports = app;
+export default app;
