@@ -11,11 +11,15 @@ const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
 let url = 'https://www.nytimes.com/games/strands';
 
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
 app.get('/data', async (req, res) => {
   let data = myCache.get('data');
 
   if (data === undefined) {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
     const page = await browser.newPage();
     await page.goto(url);
 
@@ -49,6 +53,6 @@ app.get('/data', async (req, res) => {
   res.json({ clue: data.clue, buttonValues: formattedButtonValues });
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.listen(process.env.PORT || 3000, () => console.log('Server running on port 3000'));
 
 module.exports = app;
