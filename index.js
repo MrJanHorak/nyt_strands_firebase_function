@@ -1,9 +1,10 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const NodeCache = require('node-cache');
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
+
+
 app.use(cors());
 // Create a new cache instance
 const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });

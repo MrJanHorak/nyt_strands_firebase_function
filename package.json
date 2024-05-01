@@ -2,7 +2,6 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "postinstall": "node node_modules/puppeteer/install.mjs",
     "start": "node index.js"
   },
   "engines": {
@@ -17,7 +16,7 @@
     "puppeteer-core": "^22.7.1"
   },
   "devDependencies": {
-    "firebase-functions-test": "^3.1.0"
+
   },
   "private": true
 }
