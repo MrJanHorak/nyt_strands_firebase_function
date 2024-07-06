@@ -4,8 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-
-app.use(cors());
+app.use(cors({ origin: '*' }));
 // Create a new cache instance
 const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
@@ -17,9 +16,12 @@ app.get('/', (req, res) => {
 
 app.get('/data', async (req, res) => {
   let data = myCache.get('data');
+  const clientTimezone = req.query.timezone;
 
   if (data === undefined) {
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', `--timezone=${clientTimezone}`],
+    });
     const page = await browser.newPage();
     await page.goto(url);
 
@@ -49,10 +51,12 @@ app.get('/data', async (req, res) => {
   for (let i = 0; i < data.buttonValues.length; i += 6) {
     formattedButtonValues.push(data.buttonValues.slice(i, i + 6));
   }
-
+  res.set('Access-Control-Allow-Origin', '*');
   res.json({ clue: data.clue, buttonValues: formattedButtonValues });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log('Server running on port 3000'));
+app.listen(process.env.PORT || 3000, () =>
+  console.log('Server running on port 3000')
+);
 
 module.exports = app;
