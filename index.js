@@ -1,12 +1,12 @@
 const puppeteer = require('puppeteer');
-const NodeCache = require('node-cache');
+// const NodeCache = require('node-cache');
 const express = require('express');
 const cors = require('cors');
 const app = express();
 
 app.use(cors({ origin: '*' }));
 // Create a new cache instance
-const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
+// const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
 let url = 'https://www.nytimes.com/games/strands';
 
@@ -15,14 +15,16 @@ app.get('/', (req, res) => {
 });
 
 app.get('/data', async (req, res) => {
-  let data = myCache.get('data');
+  let data
   const clientTimezone = req.query.timezone;
 
-  if (data === undefined) {
+  // if (data === undefined) {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', `--timezone=${clientTimezone}`],
+      args: ['--no-sandbox'],
     });
+  
     const page = await browser.newPage();
+    await page.emulateTimezone(clientTimezone);
     await page.goto(url);
 
     // Click the play button
@@ -41,10 +43,10 @@ app.get('/data', async (req, res) => {
       return { buttonValues, clue };
     });
 
-    myCache.set('data', data);
+    // myCache.set('data', data);
 
     await browser.close();
-  }
+  // }
 
   // Format the data into an array of arrays with 8 arrays of 6 numbers
   let formattedButtonValues = [];
