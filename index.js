@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 // const NodeCache = require('node-cache');
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch');
 const app = express();
 
 app.use(cors({ origin: '*' }));
@@ -36,10 +35,8 @@ app.get('/data', async (req, res) => {
     return res.status(500).json({ error: 'Failed to fetch JSON data' });
   }
 
-  // Extract the themeWords and spangram elements from the JSON response
   const { themeWords, spangram } = jsonResponse;
 
-  // if (data === undefined) {
   const browser = await puppeteer.launch({
     args: ['--no-sandbox'],
   });
