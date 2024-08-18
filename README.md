@@ -6,3 +6,5 @@ This will eventually be a firebase function with a 24 hour cache as to only scra
 
 Technology used: 
 * Puppeteer 
+
+Deployed to a google cloud run. Runs in a docker container.
