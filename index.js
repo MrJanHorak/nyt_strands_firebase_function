@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 // const NodeCache = require('node-cache');
 const express = require('express');
 const cors = require('cors');
+const fetch = require('node-fetch');
 const app = express();
 
 app.use(cors({ origin: '*' }));
@@ -9,43 +10,61 @@ app.use(cors({ origin: '*' }));
 // const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
 let url = 'https://www.nytimes.com/games/strands';
+let url2 = 'https://www.nytimes.com/games-assets/strands/';
+
+// 2024-04-04.json
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
 app.get('/data', async (req, res) => {
-  let data
+  let data;
   const clientTimezone = req.query.timezone;
 
+  const currentDate = new Date().toLocaleDateString('en-CA', {
+    timeZone: clientTimezone,
+  });
+
+  const dynamicUrl = `${url2}${currentDate}.json`;
+
+  let jsonResponse;
+  try {
+    const response = await fetch(dynamicUrl);
+    jsonResponse = await response.json();
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch JSON data' });
+  }
+
+  // Extract the themeWords and spangram elements from the JSON response
+  const { themeWords, spangram } = jsonResponse;
+
   // if (data === undefined) {
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox'],
-    });
-  
-    const page = await browser.newPage();
-    await page.emulateTimezone(clientTimezone);
-    await page.goto(url);
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox'],
+  });
 
-    // Click the play button
-    await page.click('button.Feo8La_playButton');
+  const page = await browser.newPage();
+  await page.emulateTimezone(clientTimezone);
+  await page.goto(url);
 
-    // Wait for the necessary element to be loaded
-    await page.waitForSelector('button.pRjvKq_item');
+  // Click the play button
+  await page.click('button.Feo8La_playButton');
 
-    // Scrape the data
-    data = await page.evaluate(() => {
-      const buttons = Array.from(
-        document.querySelectorAll('button.pRjvKq_item')
-      );
-      const buttonValues = buttons.map((button) => button.innerText);
-      const clue = document.querySelector('h1.umfyna_clue').innerText;
-      return { buttonValues, clue };
-    });
+  // Wait for the necessary element to be loaded
+  await page.waitForSelector('button.pRjvKq_item');
 
-    // myCache.set('data', data);
+  // Scrape the data
+  data = await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll('button.pRjvKq_item'));
+    const buttonValues = buttons.map((button) => button.innerText);
+    const clue = document.querySelector('h1.umfyna_clue').innerText;
+    return { buttonValues, clue };
+  });
 
-    await browser.close();
+  // myCache.set('data', data);
+
+  await browser.close();
   // }
 
   // Format the data into an array of arrays with 8 arrays of 6 numbers
@@ -54,7 +73,12 @@ app.get('/data', async (req, res) => {
     formattedButtonValues.push(data.buttonValues.slice(i, i + 6));
   }
   res.set('Access-Control-Allow-Origin', '*');
-  res.json({ clue: data.clue, buttonValues: formattedButtonValues });
+  res.json({
+    clue: data.clue,
+    buttonValues: formattedButtonValues,
+    spangram,
+    themeWords,
+  });
 });
 
 app.listen(process.env.PORT || 3000, () =>
