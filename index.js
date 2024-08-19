@@ -24,14 +24,14 @@ app.get('/data', async (req, res) => {
   const currentDate = new Date().toLocaleDateString('en-CA', {
     timeZone: clientTimezone,
   });
-  console.log('CURRENT DATE: ',currentDate);
+
   const dynamicUrl = `${url2}${currentDate}.json`;
 
   let jsonResponse;
   try {
     const response = await fetch(dynamicUrl);
     jsonResponse = await response.json();
-    console.log(jsonResponse);
+
   } catch (error) {
     console.error('Error fetching JSON data:', error);
     return res.status(500).json({ error: 'Failed to fetch JSON data' });
@@ -71,7 +71,7 @@ app.get('/data', async (req, res) => {
   for (let i = 0; i < startingBoard.length; i++) {
     formattedButtonValues.push(startingBoard[i].split(''));
   }
-  console.log(formattedButtonValues);
+
   res.set('Access-Control-Allow-Origin', '*');
   res.json({
     clue,
