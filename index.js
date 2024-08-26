@@ -15,37 +15,41 @@ app.get('/', (req, res) => {
 });
 
 app.get('/data', async (req, res) => {
-  let data
+  let data;
   const clientTimezone = req.query.timezone;
 
   // if (data === undefined) {
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox'],
-    });
-  
-    const page = await browser.newPage();
-    await page.emulateTimezone(clientTimezone);
-    await page.goto(url);
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox'],
+  });
 
-    // Click the play button
-    await page.click('button.Feo8La_playButton');
+  const page = await browser.newPage();
+  await page.emulateTimezone(clientTimezone);
+  await page.goto(url);
 
-    // Wait for the necessary element to be loaded
-    await page.waitForSelector('button.pRjvKq_item');
+  await page.waitForSelector('button[data-testid="moment-btn-play"]');
 
-    // Scrape the data
-    data = await page.evaluate(() => {
-      const buttons = Array.from(
-        document.querySelectorAll('button.pRjvKq_item')
-      );
-      const buttonValues = buttons.map((button) => button.innerText);
-      const clue = document.querySelector('h1.umfyna_clue').innerText;
-      return { buttonValues, clue };
-    });
+  await page.click('button[data-testid="moment-btn-play"]');
 
-    // myCache.set('data', data);
+  // Wait for the necessary element to be loaded
+  await page.waitForSelector('.styles-module_strandsBtn__xobCT');
+  await page.waitForSelector('.riddle-module_clue__DAHxH');
 
-    await browser.close();
+  // Scrape the data
+  data = await page.evaluate(() => {
+    const buttons = Array.from(
+      document.querySelectorAll('.styles-module_strandsBtn__xobCT')
+    );
+    const buttonValues = buttons.map((button) => button.innerText);
+    const clue = document.querySelector(
+      'h1.riddle-module_clue__DAHxH'
+    ).innerText;
+    return { buttonValues, clue };
+  });
+
+  // myCache.set('data', data);
+
+  await browser.close();
   // }
 
   // Format the data into an array of arrays with 8 arrays of 6 numbers
