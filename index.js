@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
 // const NodeCache = require('node-cache');
 const express = require('express');
 const cors = require('cors');
@@ -9,6 +9,9 @@ app.use(cors({ origin: '*' }));
 // const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
 let url = 'https://www.nytimes.com/games/strands';
+let url2 = 'https://www.nytimes.com/svc/strands/v2/';
+
+// 2024-09-05.json
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -18,47 +21,64 @@ app.get('/data', async (req, res) => {
   let data;
   const clientTimezone = req.query.timezone;
 
-  // if (data === undefined) {
-  const browser = await puppeteer.launch({
-    args: ['--no-sandbox'],
+  const currentDate = new Date().toLocaleDateString('en-CA', {
+    timeZone: clientTimezone,
   });
 
-  const page = await browser.newPage();
-  await page.emulateTimezone(clientTimezone);
-  await page.goto(url);
+  const dynamicUrl = `${url2}${currentDate}.json`;
 
-  await page.waitForSelector('button[data-testid="moment-btn-play"]');
+  let jsonResponse;
+  try {
+    const response = await fetch(dynamicUrl);
+    jsonResponse = await response.json();
 
-  await page.click('button[data-testid="moment-btn-play"]');
+  } catch (error) {
+    console.error('Error fetching JSON data:', error);
+    return res.status(500).json({ error: 'Failed to fetch JSON data' });
+  }
 
-  // Wait for the necessary element to be loaded
-  await page.waitForSelector('.styles-module_strandsBtn__xobCT');
-  await page.waitForSelector('.riddle-module_clue__DAHxH');
+  const { themeWords, spangram, startingBoard, clue } = jsonResponse;
 
-  // Scrape the data
-  data = await page.evaluate(() => {
-    const buttons = Array.from(
-      document.querySelectorAll('.styles-module_strandsBtn__xobCT')
-    );
-    const buttonValues = buttons.map((button) => button.innerHTML);
-    const clue = document.querySelector(
-      'h1.riddle-module_clue__DAHxH'
-    ).innerHTML;
-    return { buttonValues, clue };
-  });
+  // const browser = await puppeteer.launch({
+  //   args: ['--no-sandbox'],
+  // });
 
-  // myCache.set('data', data);
+  // const page = await browser.newPage();
+  // await page.emulateTimezone(clientTimezone);
+  // await page.goto(url);
 
-  await browser.close();
-  // }
+  // // Click the play button
+  // await page.click('button.Feo8La_playButton');
+
+  // // Wait for the necessary element to be loaded
+  // await page.waitForSelector('button.pRjvKq_item');
+
+  // // Scrape the data
+  // data = await page.evaluate(() => {
+  //   const buttons = Array.from(document.querySelectorAll('button.pRjvKq_item'));
+  //   const buttonValues = buttons.map((button) => button.innerText);
+  //   const clue = document.querySelector('h1.umfyna_clue').innerText;
+  //   return { buttonValues, clue };
+  // });
+
+  // // myCache.set('data', data);
+
+  // await browser.close();
+  // // }
 
   // Format the data into an array of arrays with 8 arrays of 6 numbers
   let formattedButtonValues = [];
-  for (let i = 0; i < data.buttonValues.length; i += 6) {
-    formattedButtonValues.push(data.buttonValues.slice(i, i + 6));
+  for (let i = 0; i < startingBoard.length; i++) {
+    formattedButtonValues.push(startingBoard[i].split(''));
   }
+
   res.set('Access-Control-Allow-Origin', '*');
-  res.json({ clue: data.clue, buttonValues: formattedButtonValues });
+  res.json({
+    clue,
+    buttonValues: formattedButtonValues,
+    spangram,
+    themeWords,
+  });
 });
 
 app.listen(process.env.PORT || 3000, () =>
