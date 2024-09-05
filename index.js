@@ -40,10 +40,10 @@ app.get('/data', async (req, res) => {
     const buttons = Array.from(
       document.querySelectorAll('.styles-module_strandsBtn__xobCT')
     );
-    const buttonValues = buttons.map((button) => button.innerText);
+    const buttonValues = buttons.map((button) => button.innerHTML);
     const clue = document.querySelector(
       'h1.riddle-module_clue__DAHxH'
-    ).innerText;
+    ).innerHTML;
     return { buttonValues, clue };
   });
 
