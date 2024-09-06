@@ -11,10 +11,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "functions": "file:",
-    "node-cache": "^5.1.2",
-    "puppeteer": "^22.7.1",
-    "puppeteer-core": "^22.7.1"
+    "functions": "file:"
   },
   "private": true
 }
